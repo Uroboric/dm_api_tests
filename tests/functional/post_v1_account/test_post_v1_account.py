@@ -12,7 +12,7 @@ def test_post_v1_account():
     mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
 
     # # Регистрация пользователя
-    login = 'TRheodor_crow24'
+    login = 'feel_good112'
     email = f'{login}@mail.com'
     password = 'strongpassword'
     json_data = {
