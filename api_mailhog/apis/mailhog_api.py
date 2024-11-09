@@ -2,18 +2,11 @@ import requests
 
 
 class MailhogApi:
-    def __init__(
-            self,
-            host,
-            headers=None
-    ):
+    def __init__(self, host, headers=None):
         self.host = host
         self.headers = headers
 
-    def get_api_v2_messages(
-            self,
-            limit=10
-    ):
+    def get_api_v2_messages(self, limit=10):
         """
         Get user emails
         :return:
