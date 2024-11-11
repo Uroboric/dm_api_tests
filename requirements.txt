@@ -1,3 +1,5 @@
+curlify==2.2.1
+Faker==30.8.2
 pytest==8.3.3
 requests==2.32.3
-faker==30.8.2
+structlog==24.4.0
