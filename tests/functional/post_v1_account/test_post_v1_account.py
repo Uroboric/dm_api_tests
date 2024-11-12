@@ -3,6 +3,8 @@ from faker import Faker
 
 from dm_api_account.apis.account_api import AccountApi
 from api_mailhog.apis.mailhog_api import MailhogApi
+from restclient.configuration import Configuration as MailhogConfiguration
+from restclient.configuration import Configuration as DmApiConfiguration
 import structlog
 
 
@@ -19,8 +21,11 @@ structlog.configure(
 
 def test_post_v1_account():
     # Initialization
-    account_api = AccountApi(host='http://5.63.153.31:5051')
-    mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
+    mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
+    dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
+
+    account_api = AccountApi(configuration=dm_api_configuration)
+    mailhog_api = MailhogApi(configuration=mailhog_configuration)
 
     # # Регистрация пользователя
     fake = Faker()
