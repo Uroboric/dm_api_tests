@@ -1,4 +1,3 @@
-from json import loads
 from faker import Faker
 
 from helpers.account_helper import AccountHelper
@@ -35,12 +34,12 @@ def test_post_v1_account_login():
 
     # Регистрация пользователя
     fake = Faker()
-    login = "tst_acc1" + str(fake.random_int(min=1, max=9999))
+    login = "tst_account_" + str(fake.random_int(min=1, max=9999))
     email = f'{login}@mail.com'
     password = 'strongpassword'
     account_helper.register_new_user(login=login, password=password, email=email)
 
+    account_helper.activate_user(login=login)
+
     # Авторизоваться
     account_helper.user_login(login=login, password=password)
-
-

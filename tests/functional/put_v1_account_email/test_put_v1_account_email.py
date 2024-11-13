@@ -1,6 +1,6 @@
-from json import loads
 from faker import Faker
 
+from helpers.account_helper import AccountHelper
 from restclient.configuration import Configuration as MailhogConfiguration
 from restclient.configuration import Configuration as DmApiConfiguration
 import structlog
@@ -21,97 +21,35 @@ structlog.configure(
 
 def test_put_v1_account_email():
     # Initialization
+    # 1.Создали конфигурацию
     mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
     dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
 
+    # 2. with configuration parametrize our Facades(they join our mini apis)
     dm_api = DMApiAccount(configuration=dm_api_configuration)
     mailhog = MailHogApi(configuration=mailhog_configuration)
 
+    # 3. With our Facades(our 2 services - dm create and mailhog MEGA Facade)
+    account_helper = AccountHelper(dm_account_api=dm_api, mailhog=mailhog)
+
     # Регистрация пользователя
     fake = Faker()
-    login = "tst_acc1" + str(fake.random_int(min=1, max=9999))
+    login = "tst_account_" + str(fake.random_int(min=1, max=9999))
     email = f'{login}@mail.com'
     password = 'strongpassword'
-    json_data = {
-        'login': login,
-        'email': email,
-        'password': password,
-    }
-    response = dm_api.account_api.post_v1_account(json_data=json_data)
-    assert response.status_code == 201, f'User is not created! {response.json()}'
-
-    # Получить письма из почтового сервера
-    response = mailhog.mailhog_api.get_api_v2_messages()
-    assert response.status_code == 200, 'Email does not received!'
-
-    # Получить активационный токен
-    token = get_activation_token_by_login(login, response)
-    assert token is not None, f'Token for user {login} does not received!'
+    account_helper.register_new_user(login=login, password=password, email=email)
 
     # Активация пользователя
-    response = dm_api.account_api.put_v1_account_token(token=token)
-    assert response.status_code == 200, 'User does not activated!'
-
-    # Авторизоваться
-    json_data = {
-        'login': login,
-        'password': password,
-        'rememberMe': True,
-    }
-
-    response, auth_token = dm_api.login_api.post_v1_account_login(json_data=json_data)
-    assert response.status_code == 200, "The user cannot log in"
-    assert auth_token is not None, "x-dm-auth-token was not retrieved"
+    account_helper.activate_user(login=login)
 
     # Меняем емейл
-    json_data = {
-        'login': login,
-        'email': email,
-        'password': password,
-    }
-    response = dm_api.account_api.put_v1_account_email(json_data=json_data)
-    assert response.status_code == 200, f"User can't created{response.json()}"
+    account_helper.change_email(login=login, password=password, email=email)
 
     # Пытаемся войти, получаем 403
-    json_data = {
-        'login': login,
-        'password': password,
-        'rememberMe': True,
-    }
-
-    response, auth_token = dm_api.login_api.post_v1_account_login(json_data=json_data)
-    assert response.status_code == 403, "The user cannot log in"
-
-    # На почте находим токен по новому емейлу для подтверждения смены емейла
-    response = mailhog.mailhog_api.get_api_v2_messages()
-    assert response.status_code == 200, "Messages cannot be sent"
-
-    # Активируем этот токен
-    # Получить активационный токен
-    token = get_activation_token_by_login(login, response)
-    assert token is not None, f"Token for user {login}, cannot be received"
+    account_helper.user_login(login=login, password=password, expected_status_code=403)
 
     # Активация пользователя
-    response = dm_api.account_api.put_v1_account_token(token=token)
-    assert response.status_code == 200, "User cannot be activated"
+    account_helper.activate_user(login=login)
 
     # Авторизоваться
-    json_data = {
-        'login': login,
-        'password': password,
-        'rememberMe': True,
-    }
-
-    response, auth_token = dm_api.login_api.post_v1_account_login(json_data=json_data)
-    assert response.status_code == 200, "The user cannot log in"
-    assert auth_token, "x-dm-auth-token was not retrieved"
-
-
-def get_activation_token_by_login(login, response):
-    token = None
-    for item in response.json()['items']:
-        user_data = loads(item['Content']['Body'])
-        user_login = user_data['Login']
-        if user_login == login:
-            token = user_data['ConfirmationLinkUrl'].split('/')[-1]
-    return token
+    account_helper.user_login(login=login, password=password)
