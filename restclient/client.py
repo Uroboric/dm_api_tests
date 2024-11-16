@@ -14,10 +14,14 @@ class RestClient:
             configuration: Configuration
     ):
         self.host = configuration.host
-        self.headers = configuration.headers
+        self.set_headers(configuration.headers)
         self.disable_log = configuration.disable_log
         self.session = session()
         self.log = structlog.getLogger(__name__).bind(service='api')
+
+    def set_headers(self, headers):
+        if headers:
+            self.session.headers.update(headers)
 
     def post(self, path, **kwargs):
         return self._send_request(method='POST', path=path, **kwargs)
@@ -31,9 +35,9 @@ class RestClient:
     def delete(self, path, **kwargs):
         return self._send_request(method='DELETE', path=path, **kwargs)
 
-    #метод для логирования запросов
-    #kwargs принимает функции(переменные значения именованных аргуменов) из реквест принимает json, data, verified и т.д.
-    #kwargs является словарем по сути и значения получаем соотв оразом из нево
+    # метод для логирования запросов
+    # kwargs принимает функции(переменные значения именованных аргуменов)из реквест принимает json, data, verified и т.д
+    # kwargs является словарем по сути и значения получаем соотв оразом из нево
     def _send_request(self, method, path, **kwargs):
         log = self.log.bind(event_id=str(uuid.uuid4()))
         full_url = self.host + path
