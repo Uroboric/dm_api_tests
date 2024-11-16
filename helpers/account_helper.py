@@ -3,6 +3,12 @@ from json import loads
 
 from services.dm_api_account import DMApiAccount
 from services.api_mailhog import MailHogApi
+from retrying import retry
+
+
+def retry_if_result_none(result):
+    """Return True if we should retry (in this case when result is None), False otherwise"""
+    return result is None
 
 
 def retryer(function):
@@ -76,7 +82,7 @@ class AccountHelper:
         response = self.dm_account_api.login_api.delete_v1_account_login(auth_token=auth_token)
         assert response.status_code == 204, 'User is not unauthorized!'
 
-    @retryer
+    @retry(stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000)
     def get_activation_token_by_login(self, login):
         token = None
         response = self.mailhog.mailhog_api.get_api_v2_messages()
