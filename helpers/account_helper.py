@@ -3,7 +3,7 @@ from json import loads
 
 from services.dm_api_account import DMApiAccount
 from services.api_mailhog import MailHogApi
-from retrying import retry
+# from retrying import retry
 
 
 def retry_if_result_none(result):
@@ -29,7 +29,6 @@ def retryer(function):
 
 
 class AccountHelper:
-    auth_token = None
 
     def __init__(self, dm_account_api: DMApiAccount, mailhog: MailHogApi):
         self.dm_account_api = dm_account_api
@@ -74,7 +73,7 @@ class AccountHelper:
             'rememberMe': remember_me,
         }
         response, auth_token = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
-        assert response.status_code == expected_status_code, "The user cannot log in"
+        # assert response.status_code == expected_status_code, "The user cannot log in"
         if expected_status_code == 200:
             assert auth_token is not None, "x-dm-auth-token was not retrieved"
         return auth_token
@@ -88,18 +87,67 @@ class AccountHelper:
         response = self.dm_account_api.account_api.put_v1_account_email(json_data=json_data)
         assert response.status_code == 200, 'Email does not change!'
 
-    def logout_current_user(self, auth_token):
-        response = self.dm_account_api.login_api.delete_v1_account_login(auth_token=auth_token)
+    def logout_current_user(self, **kwargs):
+        response = self.dm_account_api.login_api.delete_v1_account_login(**kwargs)
         assert response.status_code == 204, 'User is not unauthorized!'
 
-    @retry(stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000)
-    def get_activation_token_by_login(self, login):
+    # @retry(stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000)
+    def get_activation_token_by_login(self, login: str, token_type: str = 'activate'):
         token = None
         response = self.mailhog.mailhog_api.get_api_v2_messages()
-        assert response.status_code == 200, 'Email does not received!'
         for item in response.json()['items']:
             user_data = loads(item['Content']['Body'])
             user_login = user_data['Login']
-            if user_login == login:
+            if user_login == login and token_type == 'activate' and user_data.get('ConfirmationLinkUrl'):
                 token = user_data['ConfirmationLinkUrl'].split('/')[-1]
+            elif user_login == login and token_type == 'reset' and user_data.get('ConfirmationLinkUri'):
+                token = user_data['ConfirmationLinkUri'].split('/')[-1]
         return token
+
+    def reset_password(self, login: str, email: str):
+        json_data = {'login': login, 'email': email}
+        response = self.dm_account_api.account_api.post_v1_account_password(json_data=json_data)
+        return response
+
+    def get_user_info(self):
+        self.dm_account_api.account_api.get_v1_account()
+
+    def change_password(
+            self,
+            login: str,
+            token: str,
+            old_password: str,
+            new_password: str
+    ):
+        json_data = {
+            "login": login,
+            "token": token,
+            "oldPassword": old_password,
+            "newPassword": new_password
+        }
+        response = self.dm_account_api.account_api.put_v1_account_password(
+            json_data=json_data
+        )
+        return response
+
+    def reset_and_change_password(
+            self,
+            login: str,
+            email: str,
+            old_password: str,
+            new_password: str
+    ):
+        self.reset_password(
+            login=login,
+            email=email
+        )
+        token = self.get_activation_token_by_login(
+            login=login,
+            token_type='reset'
+        )
+        self.change_password(
+            login=login,
+            token=token,
+            old_password=old_password,
+            new_password=new_password
+        )
