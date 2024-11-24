@@ -56,7 +56,7 @@ def auth_account_helper(mailhog_api):
 @pytest.fixture()
 def prepare_user():
     fake = Faker()
-    login = "tst_account_" + str(fake.random_int(min=1, max=9999))
+    login = "homer_account_" + str(fake.random_int(min=1, max=9999))
     email = f'{login}@mail.com'
     new_email = f'{login}NEW@mail.com'
     password = 'strongpassword'

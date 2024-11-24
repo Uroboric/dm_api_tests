@@ -35,9 +35,12 @@ class AccountHelper:
         self.mailhog = mailhog
 
     def auth_client(self, login: str, password: str):
-        response, auth_token = self.dm_account_api.login_api.post_v1_account_login(
-            json_data={'login': login, 'password': password}
-        )
+        json_data = {
+            'login': login,
+            'password': password
+        }
+        response = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
+        auth_token = response.headers['X-Dm-Auth-Token']
         token = {
             "X-Dm-Auth-Token": auth_token
         }
@@ -55,16 +58,20 @@ class AccountHelper:
         assert response.status_code == 201, f'User is not created! {response.json()}'
         return response
 
-    def activate_user(self, login: str):
-        # response = self.mailhog.mailhog_api.get_api_v2_messages()
-        # assert response.status_code == 200, 'Email does not received!'
-
-        token = self.get_activation_token_by_login(login=login)
-        assert token is not None, f'Token for user {login} does not received!'
-
+    def activate_user(self, token: str):
         response = self.dm_account_api.account_api.put_v1_account_token(token=token)
         assert response.status_code == 200, 'User does not activated!'
         return response
+
+    def register_and_activate_user(self, login: str, email: str, password: str):
+        self.register_new_user(login=login, email=email, password=password)
+        token = self.get_activation_token_by_login(login=login)
+        self.activate_user(token=token)
+
+    def find_activation_mail_and_activate_user(self, login: str):
+        token = self.get_activation_token_by_login(login=login)
+        assert token is not None, f'Token for user {login} does not received!'
+        self.activate_user(token=token)
 
     def user_login(self, login: str, password: str, remember_me: bool = True, expected_status_code: int = 200):
         json_data = {
@@ -72,11 +79,9 @@ class AccountHelper:
             'password': password,
             'rememberMe': remember_me,
         }
-        response, auth_token = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
-        # assert response.status_code == expected_status_code, "The user cannot log in"
-        if expected_status_code == 200:
-            assert auth_token is not None, "x-dm-auth-token was not retrieved"
-        return auth_token
+        response = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
+        assert response.status_code == expected_status_code, "The user cannot log in"
+        return response
 
     def change_email(self, login: str, password: str, email: str):
         json_data = {
@@ -89,6 +94,10 @@ class AccountHelper:
 
     def logout_current_user(self, **kwargs):
         response = self.dm_account_api.login_api.delete_v1_account_login(**kwargs)
+        assert response.status_code == 204, 'User is not unauthorized!'
+
+    def logout_user_from_all_devices(self, ** kwargs):
+        response = self.dm_account_api.login_api.delete_v1_account_login_all(**kwargs)
         assert response.status_code == 204, 'User is not unauthorized!'
 
     # @retry(stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000)
@@ -125,9 +134,7 @@ class AccountHelper:
             "oldPassword": old_password,
             "newPassword": new_password
         }
-        response = self.dm_account_api.account_api.put_v1_account_password(
-            json_data=json_data
-        )
+        response = self.dm_account_api.account_api.put_v1_account_password(json_data=json_data)
         return response
 
     def reset_and_change_password(

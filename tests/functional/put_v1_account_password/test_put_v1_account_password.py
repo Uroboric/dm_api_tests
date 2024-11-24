@@ -1,10 +1,10 @@
 def test_put_v1_account_password(account_helper, prepare_user):
     login = prepare_user.login
-    password = prepare_user.password
     email = prepare_user.email
+    password = prepare_user.password
     new_password = prepare_user.new_password
 
-    account_helper.register_new_user(login=login, email=email, password=password)
+    account_helper.register_and_activate_user(login=login, email=email, password=password)
 
     account_helper.auth_client(login=login, password=password)
 
