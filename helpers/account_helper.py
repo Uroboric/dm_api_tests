@@ -46,6 +46,7 @@ class AccountHelper:
         }
         self.dm_account_api.account_api.set_headers(token)
         self.dm_account_api.login_api.set_headers(token)
+        assert response.headers["X-Dm-Auth-Token"], "Token for user doesn't received"
 
     def register_new_user(self, login: str, password: str, email: str):
         json_data = {
@@ -65,7 +66,10 @@ class AccountHelper:
 
     def register_and_activate_user(self, login: str, email: str, password: str):
         self.register_new_user(login=login, email=email, password=password)
+        start_time = time.time()
         token = self.get_activation_token_by_login(login=login)
+        end_time = time.time()
+        assert end_time - start_time < 3, "Activation waiting time out of limit"
         self.activate_user(token=token)
 
     def find_activation_mail_and_activate_user(self, login: str):
