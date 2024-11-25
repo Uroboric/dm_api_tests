@@ -1,17 +1,17 @@
+from dm_api_account.models.registration import Registration
 from restclient.client import RestClient
 
 
 class AccountApi(RestClient):
 
-    def post_v1_account(self, json_data):
+    def post_v1_account(self, registration: Registration):
         """
         Register new user
-        :param json_data:
         :return:
         """
         response = self.post(
             path='/v1/account',
-            json=json_data
+            json=registration.model_dump(exclude_none=True, by_alias=True)  # exclude_none - if some field is optional and not filled in, we will not pass it
         )
         return response
 

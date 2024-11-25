@@ -1,6 +1,8 @@
 import time
 from json import loads
 
+from dm_api_account.models.login_credentials import LoginCredentials
+from dm_api_account.models.registration import Registration
 from services.dm_api_account import DMApiAccount
 from services.api_mailhog import MailHogApi
 # from retrying import retry
@@ -35,11 +37,11 @@ class AccountHelper:
         self.mailhog = mailhog
 
     def auth_client(self, login: str, password: str):
-        json_data = {
-            'login': login,
-            'password': password
-        }
-        response = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+        )
+        response = self.dm_account_api.login_api.post_v1_account_login(login_credentials=login_credentials)
         auth_token = response.headers['X-Dm-Auth-Token']
         token = {
             "X-Dm-Auth-Token": auth_token
@@ -49,13 +51,13 @@ class AccountHelper:
         assert response.headers["X-Dm-Auth-Token"], "Token for user doesn't received"
 
     def register_new_user(self, login: str, password: str, email: str):
-        json_data = {
-            'login': login,
-            'email': email,
-            'password': password,
-        }
+        registration = Registration(
+            login=login,
+            email=email,
+            password=password,
+        )
 
-        response = self.dm_account_api.account_api.post_v1_account(json_data=json_data)
+        response = self.dm_account_api.account_api.post_v1_account(registration=registration)
         assert response.status_code == 201, f'User is not created! {response.json()}'
         return response
 
@@ -78,12 +80,12 @@ class AccountHelper:
         self.activate_user(token=token)
 
     def user_login(self, login: str, password: str, remember_me: bool = True, expected_status_code: int = 200):
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': remember_me,
-        }
-        response = self.dm_account_api.login_api.post_v1_account_login(json_data=json_data)
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+            remember_me=remember_me,
+        )
+        response = self.dm_account_api.login_api.post_v1_account_login(login_credentials=login_credentials)
         assert response.status_code == expected_status_code, "The user cannot log in"
         return response
 
