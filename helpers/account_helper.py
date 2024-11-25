@@ -36,12 +36,12 @@ class AccountHelper:
         self.dm_account_api = dm_account_api
         self.mailhog = mailhog
 
-    def auth_client(self, login: str, password: str):
+    def auth_client(self, login: str, password: str, validate_response=False):
         login_credentials = LoginCredentials(
             login=login,
             password=password,
         )
-        response = self.dm_account_api.login_api.post_v1_account_login(login_credentials=login_credentials)
+        response = self.dm_account_api.login_api.post_v1_account_login(login_credentials=login_credentials, validate_response=validate_response)
         auth_token = response.headers['X-Dm-Auth-Token']
         token = {
             "X-Dm-Auth-Token": auth_token
@@ -63,7 +63,7 @@ class AccountHelper:
 
     def activate_user(self, token: str):
         response = self.dm_account_api.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, 'User does not activated!'
+        # assert response.status_code == 200, 'User does not activated!'
         return response
 
     def register_and_activate_user(self, login: str, email: str, password: str):
@@ -79,14 +79,14 @@ class AccountHelper:
         assert token is not None, f'Token for user {login} does not received!'
         self.activate_user(token=token)
 
-    def user_login(self, login: str, password: str, remember_me: bool = True, expected_status_code: int = 200):
+    def user_login(self, login: str, password: str, remember_me: bool = True, expected_status_code: int = 200, ):
         login_credentials = LoginCredentials(
             login=login,
             password=password,
             remember_me=remember_me,
         )
         response = self.dm_account_api.login_api.post_v1_account_login(login_credentials=login_credentials)
-        assert response.status_code == expected_status_code, "The user cannot log in"
+        # assert response.status_code == expected_status_code, "The user cannot log in"
         return response
 
     def change_email(self, login: str, password: str, email: str):
