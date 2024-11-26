@@ -11,7 +11,7 @@ def test_put_v1_account_email(account_helper, prepare_user):
     # Пытаемся войти, получаем 403
     account_helper.user_login(login=login,
                               password=password,
-                              # expected_status_code=403
+                              expected_status_code=403
                               )
 
     # Активация пользователя

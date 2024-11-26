@@ -12,7 +12,7 @@ def test_put_v1_account_password(account_helper, prepare_user):
 
     account_helper.user_login(login=login,
                               password=password,
-                              # expected_status_code=400
+                              expected_status_code=400
                               )
 
     account_helper.user_login(login=login, password=new_password)

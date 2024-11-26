@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -37,4 +37,4 @@ class User(BaseModel):
 class UserEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid")
     resource: Optional[User] = None
-    metadata: Optional[str] = None
+    metadata: Union[str, dict] = None
