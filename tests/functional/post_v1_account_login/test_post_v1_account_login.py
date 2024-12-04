@@ -1,45 +1,31 @@
-from faker import Faker
+from datetime import datetime
 
-from helpers.account_helper import AccountHelper
-from restclient.configuration import Configuration as MailhogConfiguration
-from restclient.configuration import Configuration as DmApiConfiguration
-import structlog
+from hamcrest import assert_that, has_property, starts_with, all_of, instance_of, has_properties, equal_to
 
-from services.api_mailhog import MailHogApi
-from services.dm_api_account import DMApiAccount
 
-structlog.configure(
-    processors=[
-        structlog.processors.JSONRenderer(
-            indent=4,
-            ensure_ascii=True,
-            # sort_keys=True
+def test_post_v1_account_login(account_helper, prepare_user):
+    login = prepare_user.login
+    password = prepare_user.password
+    email = prepare_user.email
+
+    account_helper.register_and_activate_user(login=login, password=password, email=email)
+    response = account_helper.user_login(login=login, password=password, validate_response=True)
+    assert_that(response, all_of(
+        has_property('resource', has_property('login', starts_with('homer_account'))),
+        has_property('resource', has_property('registration', instance_of(datetime))),
+        has_property(
+            'resource', has_properties(
+                    {
+                        'rating': has_properties(
+                            {
+                                "enabled": equal_to(True),
+                                "quality": equal_to(0),
+                                "quantity": equal_to(0)
+                            }
+                        )
+                    }
+                )
+            )
         )
-    ]
-)
-
-
-def test_post_v1_account_login():
-    # Initialization
-    # 1.Создали конфигурацию
-    mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
-    dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
-
-    # 2. with configuration parametrize our Facades(they join our mini apis)
-    dm_api = DMApiAccount(configuration=dm_api_configuration)
-    mailhog = MailHogApi(configuration=mailhog_configuration)
-
-    # 3. With our Facades(our 2 services - dm create and mailhog MEGA Facade)
-    account_helper = AccountHelper(dm_account_api=dm_api, mailhog=mailhog)
-
-    # Регистрация пользователя
-    fake = Faker()
-    login = "tst_account_" + str(fake.random_int(min=1, max=9999))
-    email = f'{login}@mail.com'
-    password = 'strongpassword'
-    account_helper.register_new_user(login=login, password=password, email=email)
-
-    account_helper.activate_user(login=login)
-
-    # Авторизоваться
-    account_helper.user_login(login=login, password=password)
+    )
+    print(response)
