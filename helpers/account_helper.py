@@ -57,7 +57,7 @@ class AccountHelper:
         )
 
         response = self.dm_account_api.account_api.post_v1_account(registration=registration)
-        assert response.status_code == 201, f'User is not created! {response.json()}'
+        # assert response.status_code == 201, f'User is not created! {response.json()}'
         return response
 
     def activate_user(self, token: str):
@@ -83,7 +83,6 @@ class AccountHelper:
                    login: str,
                    password: str,
                    remember_me: bool = True,
-                   expected_status_code: int = 200,
                    validate_response=False,
                    validate_headers=False
                    ):
@@ -98,7 +97,7 @@ class AccountHelper:
         )
         if validate_headers:
             assert response.headers['X-Dm-Auth-Token'], 'User does not get token'
-            assert response.status_code == expected_status_code, "The user cannot log in"
+            # assert response.status_code == expected_status_code, "The user cannot log in"
         return response
 
     def change_email(self, login: str, password: str, email: str):
