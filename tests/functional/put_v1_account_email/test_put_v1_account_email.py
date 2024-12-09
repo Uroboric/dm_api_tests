@@ -9,7 +9,10 @@ def test_put_v1_account_email(account_helper, prepare_user):
     account_helper.change_email(login=login, password=password, email=email)
 
     # Пытаемся войти, получаем 403
-    account_helper.user_login(login=login, password=password, expected_status_code=403)
+    account_helper.user_login(login=login,
+                              password=password,
+                              expected_status_code=403
+                              )
 
     # Активация пользователя
     account_helper.find_activation_mail_and_activate_user(login=login)
