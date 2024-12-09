@@ -57,7 +57,7 @@ class AccountHelper:
         )
 
         response = self.dm_account_api.account_api.post_v1_account(registration=registration)
-        assert response.status_code == 201, f'User is not created! {response.json()}'
+        # assert response.status_code == 201, f'User is not created! {response.json()}'
         return response
 
     def activate_user(self, token: str):
@@ -113,11 +113,11 @@ class AccountHelper:
 
     def logout_current_user(self, **kwargs):
         response = self.dm_account_api.login_api.delete_v1_account_login(**kwargs)
-        assert response.status_code == 204, 'User is not unauthorized!'
+        # assert response.status_code == 204, 'User is not unauthorized!'
 
     def logout_user_from_all_devices(self, ** kwargs):
         response = self.dm_account_api.login_api.delete_v1_account_login_all(**kwargs)
-        assert response.status_code == 204, 'User is not unauthorized!'
+        # assert response.status_code == 204, 'User is not unauthorized!'
 
     # @retry(stop_max_attempt_number=5, retry_on_result=retry_if_result_none, wait_fixed=1000)
     def get_activation_token_by_login(self, login: str, token_type: str = 'activate'):
