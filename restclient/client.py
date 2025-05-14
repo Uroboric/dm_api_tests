@@ -6,6 +6,7 @@ import uuid
 import curlify
 
 from restclient.configuration import Configuration
+from restclient.utiltties import allure_attach
 
 
 class RestClient:
@@ -38,6 +39,7 @@ class RestClient:
     # метод для логирования запросов
     # kwargs принимает функции(переменные значения именованных аргуменов)из реквест принимает json, data, verified и т.д
     # kwargs является словарем по сути и значения получаем соотв оразом из нево
+    @allure_attach
     def _send_request(self, method, path, **kwargs):
         log = self.log.bind(event_id=str(uuid.uuid4()))
         full_url = self.host + path
