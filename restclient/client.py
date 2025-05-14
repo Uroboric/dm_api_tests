@@ -8,6 +8,9 @@ import curlify
 from restclient.configuration import Configuration
 from restclient.utiltties import allure_attach
 
+from swagger_coverage_py.request_schema_handler import RequestSchemaHandler
+from swagger_coverage_py.uri import URI
+
 
 class RestClient:
     def __init__(
@@ -59,6 +62,8 @@ class RestClient:
             data=kwargs.get('data')
         )
         rest_response = self.session.request(method=method, url=full_url, **kwargs)
+        uri = URI(host=self.host, base_path='', unformatted_path=path, uri_params=kwargs.get('params'))
+        RequestSchemaHandler(uri, method.lower(), rest_response, kwargs).write_schema()
         curl = curlify.to_curl(rest_response.request)
         print(curl)
         log.msg(
