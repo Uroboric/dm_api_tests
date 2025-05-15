@@ -5,3 +5,7 @@ service:
 user:
   login: 'tst_account_8310'
   password: 'strongpassword'
+
+telegram:
+  token: '7594853684:AAFntGcFr8Y6EKIIIhn_yQILj-r9qZSIALM'
+  chat_id: '-1002633192883'
