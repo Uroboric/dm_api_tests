@@ -1,11 +1,11 @@
 service:
-  dm_api_account: 'http://5.63.153.31:5051'
-  mailhog: 'http://5.63.153.31:5025'
+  dm_api_account: "${DM_API_ACCOUNT}"
+  mailhog: "${MAILHOG}"
 
 user:
-  login: 'tst_account_8310'
-  password: 'strongpassword'
+  login: "${USER_LOGIN}"
+  password: "${USER_PASSWORD}"
 
 telegram:
-  token: '7594853684:AAFntGcFr8Y6EKIIIhn_yQILj-r9qZSIALM'
-  chat_id: '-1002633192883'
+  token: "${TG_TOKEN}"
+  chat_id: "${TG_CHAT_ID}"

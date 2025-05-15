@@ -7,5 +7,5 @@ user:
   password: 'strongpassword'
 
 telegram:
-  token: '7594853684:AAFntGcFr8Y6EKIIIhn_yQILj-r9qZSIALM'
-  chat_id: '-1002633192883'
+  token: ''
+  chat_id: ''
