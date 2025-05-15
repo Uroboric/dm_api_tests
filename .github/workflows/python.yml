@@ -44,7 +44,7 @@ jobs:
 
       - name: Create config file from template
         run: |
-          envsubst < config/stg.yaml.template > config/stg.yaml
+          envsubst < config/stg.yaml > config/stg.yaml
         env:
           DM_API_ACCOUNT: ${{ secrets.DM_API_ACCOUNT }}
           MAILHOG: ${{ secrets.MAILHOG }}
