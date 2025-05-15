@@ -32,29 +32,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set environment variables
-        run: |
-          echo "DM_API_ACCOUNT=${{ secrets.DM_API_ACCOUNT }}" >> $GITHUB_ENV
-          echo "MAILHOG=${{ secrets.MAILHOG }}" >> $GITHUB_ENV
-          echo "USER_LOGIN=${{ secrets.USER_LOGIN }}" >> $GITHUB_ENV
-          echo "USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> $GITHUB_ENV
-          echo "TG_TOKEN=${{ secrets.=TG_TOKEN }}" >> $GITHUB_ENV
-          echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}" >> $GITHUB_ENV
-
-
       - name: Run tests
         run: |
           export JAVA_HOME=$JAVA_HOME
-          pytest tests \
-            --env=ci \
-            --service.dm_api_account=$DM_API_ACCOUNT \
-            --service.mailhog=$MAILHOG \
-            --user.login=$USER_LOGIN \
-            --user.password=$USER_PASSWORD \
-            --telegram.token=TG_TOKEN \
-            --telegram.chat_id=TG_CHAT_ID \
-            --alluredir=allure-results \
-            --disable-warnings
+          pytest --alluredir=allure-results --disable-warnings
         continue-on-error: true
 
       - name: Run coverage
