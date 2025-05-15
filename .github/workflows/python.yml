@@ -56,7 +56,10 @@ jobs:
       - name: Run tests
         run: |
           export JAVA_HOME=$JAVA_HOME
-          pytest --alluredir=allure-results --disable-warnings
+          pytest tests \
+            --env=ci \
+            --alluredir=allure-results \
+            --disable-warnings
         continue-on-error: true
 
       - name: Run coverage
