@@ -56,14 +56,7 @@ jobs:
       - name: Run tests
         run: |
           export JAVA_HOME=$JAVA_HOME
-          pytest tests \
-            --env=ci \
-            --service.dm_api_account=$DM_API_ACCOUNT \
-            --service.mailhog=$MAILHOG \
-            --user.login=$USER_LOGIN \
-            --user.password=$USER_PASSWORD \
-            --alluredir=allure-results \
-            --disable-warnings
+          pytest --alluredir=allure-results --disable-warnings
         continue-on-error: true
 
       - name: Run coverage
