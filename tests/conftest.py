@@ -45,13 +45,13 @@ def setup_swagger_coverage():
 
 @pytest.fixture(scope='session', autouse=True)
 def set_config(request):
-    config = Path(__file__).joinpath('../../').joinpath('config')
+    config_dir = Path(__file__).resolve().parent.parent.parent / 'config'
     config_name = request.config.getoption('--env')
     v.set_config_name(config_name)
-    v.add_config_path(config)
+    v.add_config_path(config_dir)
     v.read_in_config()
     for option in options:
-        v.set(f'{option}', request.config.getoption(f'--{option}'))
+        v.set(option, request.config.getoption(f'--{option}'))
     os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
     os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
     request.config.stash['telegram-notifier-addfields']['enviroment'] = config_name

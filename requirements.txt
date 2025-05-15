@@ -27,4 +27,6 @@ typing_extensions==4.12.2
 urllib3==2.2.3
 vyper-config==1.2.1
 watchdog==6.0.0
+telebot==0.0.5
+pytest-telegram-notifier==1.4.0
 swagger-coverage @ https://github.com/Uroboric/swagger-coverage-py/archive/refs/heads/master.zip
