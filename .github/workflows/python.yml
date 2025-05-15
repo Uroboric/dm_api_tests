@@ -62,8 +62,6 @@ jobs:
             --service.mailhog=$MAILHOG \
             --user.login=$USER_LOGIN \
             --user.password=$USER_PASSWORD \
-            --telegram.token=$TG_TOKEN \
-            --telegram.chat_id=$TG_CHAT_ID \
             --alluredir=allure-results \
             --disable-warnings
         continue-on-error: true
